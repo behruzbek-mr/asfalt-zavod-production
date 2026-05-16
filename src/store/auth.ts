@@ -18,10 +18,10 @@ export const ROLE_LABELS: Record<UserRole, string> = {
 };
 
 export const ROLE_NAV: Record<UserRole, string[]> = {
-  admin: ['/', '/sotuv', '/mijozlar', '/haydovchilar', '/ombor', '/xarajatlar', '/ishchilar', '/hisobotlar', '/sozlamalar'],
-  operator: ['/', '/sotuv', '/mijozlar', '/haydovchilar', '/ombor', '/xarajatlar', '/hisobotlar'],
+  admin: ['/', '/sotuv', '/mijozlar', '/haydovchilar', '/firmalar', '/ombor', '/xarajatlar', '/ishchilar', '/foydalanuvchilar', '/hisobotlar', '/sozlamalar'],
+  operator: ['/', '/sotuv', '/mijozlar', '/haydovchilar', '/firmalar', '/ombor', '/xarajatlar', '/hisobotlar'],
   kassir: ['/', '/sotuv', '/mijozlar', '/hisobotlar'],
-  omborchi: ['/', '/ombor', '/haydovchilar', '/hisobotlar'],
+  omborchi: ['/', '/ombor', '/haydovchilar', '/firmalar', '/hisobotlar'],
 };
 
 interface AuthState {

@@ -1,7 +1,7 @@
 import { NavLink } from 'react-router-dom';
 import {
   LayoutDashboard, ShoppingCart, Users, Truck,
-  Package, TrendingDown, BarChart3, UserCog, Settings, Plus, Menu as MenuIcon
+  Package, TrendingDown, BarChart3, UserCog, Settings, Plus, Menu as MenuIcon, Building2
 } from 'lucide-react';
 import { useAuthStore, ROLE_NAV } from '../../store/auth';
 
@@ -10,6 +10,7 @@ const ALL_NAV = [
   { to: '/sotuv', icon: ShoppingCart, label: 'Sotuv' },
   { to: '/mijozlar', icon: Users, label: 'Mijozlar' },
   { to: '/haydovchilar', icon: Truck, label: 'Haydovchilar' },
+  { to: '/firmalar', icon: Building2, label: 'Firmalar' },
   { to: '/ombor', icon: Package, label: 'Ombor' },
   { to: '/xarajatlar', icon: TrendingDown, label: 'Xarajatlar' },
   { to: '/ishchilar', icon: UserCog, label: 'Ishchilar' },

@@ -2,7 +2,7 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, ShoppingCart, Users, Truck,
   Package, TrendingDown, BarChart3, Factory,
-  ChevronLeft, ChevronRight, UserCog, Settings, LogOut
+  ChevronLeft, ChevronRight, UserCog, Settings, LogOut, Building2
 } from 'lucide-react';
 import { useState } from 'react';
 import { useAuthStore, ROLE_NAV, ROLE_LABELS } from '../../store/auth';
@@ -13,6 +13,7 @@ const ALL_NAV = [
   { to: '/sotuv', icon: ShoppingCart, label: 'Sotuv' },
   { to: '/mijozlar', icon: Users, label: 'Mijozlar' },
   { to: '/haydovchilar', icon: Truck, label: 'Haydovchilar' },
+  { to: '/firmalar', icon: Building2, label: 'Firmalar' },
   { to: '/ombor', icon: Package, label: 'Xomashyo / Ombor' },
   { to: '/xarajatlar', icon: TrendingDown, label: 'Xarajatlar' },
   { to: '/ishchilar', icon: UserCog, label: 'Ishchilar' },

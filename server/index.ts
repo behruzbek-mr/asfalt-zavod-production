@@ -284,17 +284,21 @@ app.get('*', (req, res) => {
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, async () => {
   // Ensure default admin exists
-  await prisma.user.upsert({
-    where: { username: 'admin' },
-    update: {},
-    create: {
-      username: 'admin',
-      password: 'admin_pass_2024',
-      fullName: 'Administrator',
-      role: 'admin',
-      isActive: true
-    }
-  });
-  console.log('✨ Admin tekshirildi (admin / admin_pass_2024)');
+  try {
+    await prisma.user.upsert({
+      where: { username: 'admin' },
+      update: {},
+      create: {
+        username: 'admin',
+        password: 'admin',
+        fullName: 'Administrator',
+        role: 'admin',
+        isActive: true
+      }
+    });
+    console.log('✨ Admin tekshirildi (admin / admin)');
+  } catch (err) {
+    console.error('❌ Admin yaratishda xatolik:', err.message);
+  }
   console.log(`✅ Backend server ishga tushdi: http://localhost:${PORT}`);
 });

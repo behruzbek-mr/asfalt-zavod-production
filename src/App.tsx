@@ -12,6 +12,7 @@ import WorkersPage from './components/workers/WorkersPage';
 import ReportsPage from './components/reports/ReportsPage';
 import SettingsPage from './components/settings/SettingsPage';
 import UsersPage from './components/auth/UsersPage';
+import SuppliersPage from './components/suppliers/SuppliersPage';
 
 function AppContent() {
   useTheme();
@@ -24,6 +25,7 @@ function AppContent() {
           <Route path="mijozlar" element={<ClientsPage />} />
           <Route path="mijozlar/:id" element={<ClientProfile />} />
           <Route path="haydovchilar" element={<DriversPage />} />
+          <Route path="firmalar" element={<SuppliersPage />} />
           <Route path="ombor" element={<WarehousePage />} />
           <Route path="xarajatlar" element={<ExpensesPage />} />
           <Route path="ishchilar" element={<WorkersPage />} />

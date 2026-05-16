@@ -16,6 +16,7 @@ const ALL_NAV = [
   { to: '/sotuv', label: 'Sotuv' },
   { to: '/mijozlar', label: 'Mijozlar' },
   { to: '/haydovchilar', label: 'Haydovchilar' },
+  { to: '/firmalar', label: 'Firmalar' },
   { to: '/ombor', label: 'Xomashyo / Ombor' },
   { to: '/xarajatlar', label: 'Xarajatlar' },
   { to: '/ishchilar', label: 'Ishchilar' },
