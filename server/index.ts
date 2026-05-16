@@ -1,7 +1,7 @@
 import express from 'express';
 import cors from 'cors';
-import pkg from '@prisma/client';
-const { PrismaClient } = pkg;
+import { PrismaClient } from '@prisma/client';
+import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -13,6 +13,17 @@ const prisma = new PrismaClient();
 
 app.use(cors());
 app.use(express.json());
+
+app.get('/api/health', (req, res) => {
+  const dPath = path.join(__dirname, '../dist');
+  res.json({
+    status: 'ok',
+    __dirname,
+    distPath,
+    distExists: fs.existsSync(dPath),
+    distFiles: fs.existsSync(dPath) ? fs.readdirSync(dPath) : []
+  });
+});
 
 // Serve static files from the Vite build directory
 app.use(express.static(path.join(__dirname, '../dist')));
