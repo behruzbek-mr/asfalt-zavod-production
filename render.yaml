@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: asfalt-zavod
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: asfalt-db
+          property: connectionString
+
+databases:
+  - name: asfalt-db
+    plan: free
+    databaseName: asfalt_db
+    user: asfalt_user
