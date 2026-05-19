@@ -9,7 +9,7 @@ RUN npm install --legacy-peer-deps
 
 COPY prisma ./prisma
 RUN sed -i 's/provider = "sqlite"/provider = "postgresql"/g' prisma/schema.prisma
-RUN DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy" npx prisma generate
+RUN DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy" npx prisma@5.16.0 generate
 
 COPY . .
 RUN npm run build
@@ -25,7 +25,7 @@ RUN npm install --omit=dev --legacy-peer-deps
 
 COPY prisma ./prisma
 RUN sed -i 's/provider = "sqlite"/provider = "postgresql"/g' prisma/schema.prisma
-RUN DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy" npx prisma generate
+RUN DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy" npx prisma@5.16.0 generate
 
 COPY server ./server
 COPY --from=builder /app/dist ./dist
