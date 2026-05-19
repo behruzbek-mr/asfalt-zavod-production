@@ -33,4 +33,5 @@ COPY --from=builder /app/dist ./dist
 EXPOSE 3000
 ENV NODE_ENV=production
 
-CMD ["node", "--experimental-strip-types", "server/index.ts"]
+# Run db push to create tables on startup before launching the server
+CMD npx prisma@5.16.0 db push && node --experimental-strip-types server/index.ts
