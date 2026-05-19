@@ -25,32 +25,68 @@ export default function BottomNav({ onOpenMenu, onOpenAddMenu }: { onOpenMenu: (
   if (!currentUser) return null;
 
   const allowedPaths = ROLE_NAV[currentUser.role] || [];
-  const navItems = ALL_NAV.filter(item => allowedPaths.includes(item.to));
+  
+  // Prioritize tabs to show on the bar:
+  const priorityPaths = ['/', '/sotuv', '/mijozlar', '/ombor', '/firmalar', '/haydovchilar', '/xarajatlar'];
+  const allowedPriority = ALL_NAV.filter(item => allowedPaths.includes(item.to) && priorityPaths.includes(item.to));
+
+  // Determine left and right side items (we show 3 primary tabs + Menu button + Centered FAB)
+  const leftItems = allowedPriority.slice(0, 2);
+  const rightItems = allowedPriority.slice(2, 3);
 
   const navItemClass = (isActive: boolean) =>
-    `flex flex-col items-center justify-center gap-1 transition-colors min-w-[72px] py-1 px-1 ${isActive ? 'text-primary-600 dark:text-primary-400 border-b-2 border-primary-600 dark:border-primary-400' : 'text-slate-400 dark:text-dark-400 border-b-2 border-transparent'}`;
+    `flex flex-col items-center justify-center flex-1 h-full py-1 text-center transition-all ${
+      isActive 
+        ? 'text-primary-600 dark:text-primary-400 scale-105' 
+        : 'text-slate-400 dark:text-dark-400 hover:text-slate-600 dark:hover:text-dark-200'
+    }`;
 
   return (
-    <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 dark:bg-dark-800/95 backdrop-blur-xl border-t border-slate-200/60 dark:border-dark-700/60 z-40 shadow-[0_-8px_32px_rgba(0,0,0,0.08)] dark:shadow-[0_-8px_32px_rgba(0,0,0,0.3)]">
-      <div className="flex w-full" style={{ paddingBottom: 'max(8px, env(safe-area-inset-bottom))' }}>
-        
-        {/* Scrollable menu items */}
-        <div className="flex-1 overflow-x-auto no-scrollbar flex items-end justify-start px-2 pt-1 pb-1">
-          {navItems.map(({ to, icon: Icon, label }) => (
+    <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 dark:bg-dark-800/95 backdrop-blur-xl border-t border-slate-200/50 dark:border-dark-700/50 z-40 shadow-[0_-8px_32px_rgba(0,0,0,0.06)] dark:shadow-[0_-8px_32px_rgba(0,0,0,0.25)]">
+      <div 
+        className="flex items-center justify-between w-full relative px-2" 
+        style={{ 
+          height: '60px',
+          paddingBottom: 'max(4px, env(safe-area-inset-bottom))' 
+        }}
+      >
+        {/* Left Tabs */}
+        <div className="flex flex-1 items-center justify-around h-full">
+          {leftItems.map(({ to, icon: Icon, label }) => (
             <NavLink key={to} to={to} end={to === '/'} className={({ isActive }) => navItemClass(isActive)}>
-              <Icon className="w-5 h-5 mb-0.5" />
-              <span className="text-[10px] font-bold whitespace-nowrap">{label}</span>
+              <Icon className="w-5.5 h-5.5 mb-0.5" />
+              <span className="text-[10px] font-bold">{label}</span>
             </NavLink>
           ))}
         </div>
 
-        {/* Fixed FAB Button Container on the right */}
-        <div className="flex items-end justify-center px-3 pt-1 pb-1 border-l border-slate-200 dark:border-dark-700 bg-white/50 dark:bg-dark-800/50">
+        {/* Center Floating Plus Button */}
+        <div className="flex-shrink-0 w-16 flex justify-center -mt-6 z-50">
           <button
             onClick={onOpenAddMenu}
-            className="w-12 h-12 bg-gradient-to-br from-primary-500 to-primary-700 hover:from-primary-600 hover:to-primary-800 rounded-xl flex items-center justify-center text-white shadow-lg shadow-primary-500/30 transition-all active:scale-95"
+            className="w-13 h-13 bg-gradient-to-br from-primary-500 to-primary-600 dark:from-primary-600 dark:to-primary-700 hover:scale-105 active:scale-95 transition-all shadow-[0_4px_16px_rgba(59,130,246,0.4)] rounded-full flex items-center justify-center text-white border-4 border-slate-50 dark:border-dark-900"
+            style={{ touchAction: 'manipulation' }}
           >
-            <Plus className="w-6 h-6 stroke-[2.5]" />
+            <Plus className="w-7 h-7 stroke-[3]" />
+          </button>
+        </div>
+
+        {/* Right Tabs */}
+        <div className="flex flex-1 items-center justify-around h-full">
+          {rightItems.map(({ to, icon: Icon, label }) => (
+            <NavLink key={to} to={to} end={to === '/'} className={({ isActive }) => navItemClass(isActive)}>
+              <Icon className="w-5.5 h-5.5 mb-0.5" />
+              <span className="text-[10px] font-bold">{label}</span>
+            </NavLink>
+          ))}
+          
+          {/* Menu Drawer Button (always at the end on mobile) */}
+          <button
+            onClick={onOpenMenu}
+            className="flex flex-col items-center justify-center flex-1 h-full py-1 text-slate-400 dark:text-dark-400 hover:text-slate-600 dark:hover:text-dark-200"
+          >
+            <MenuIcon className="w-5.5 h-5.5 mb-0.5" />
+            <span className="text-[10px] font-bold">Menyu</span>
           </button>
         </div>
 

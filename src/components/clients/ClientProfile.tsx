@@ -1,8 +1,8 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   ArrowLeft, Phone, MapPin, Building2, Calendar,
-  ShoppingCart, TrendingUp, Wallet, Truck
+  ShoppingCart, TrendingUp, Wallet, Truck, ChevronLeft, ChevronRight
 } from 'lucide-react';
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
@@ -10,6 +10,115 @@ import {
 } from 'recharts';
 import { useStore } from '../../store';
 import { formatCurrency, formatDate, formatTons, getPaymentBadgeClass, getPaymentLabel } from '../../utils';
+
+function PurchaseCalendar({ salesByDate }: { salesByDate: Array<{ date: string; tons: number; amount: number; count: number }> }) {
+  const purchaseDates = useMemo(() => {
+    const map = new Map<string, { tons: number; amount: number }>();
+    salesByDate.forEach(d => {
+      map.set(d.date, { tons: d.tons, amount: d.amount });
+    });
+    return map;
+  }, [salesByDate]);
+
+  const initialDate = useMemo(() => {
+    if (salesByDate.length > 0) {
+      return new Date(salesByDate[0].date);
+    }
+    return new Date();
+  }, [salesByDate]);
+
+  const [currentDate, setCurrentDate] = useState(initialDate);
+
+  const year = currentDate.getFullYear();
+  const month = currentDate.getMonth();
+
+  const monthNames = [
+    "Yanvar", "Fevral", "Mart", "Aprel", "May", "Iyun",
+    "Iyul", "Avgust", "Sentabr", "Oktabr", "Noyabr", "Dekabr"
+  ];
+
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  
+  let startDayOfWeek = new Date(year, month, 1).getDay();
+  startDayOfWeek = startDayOfWeek === 0 ? 6 : startDayOfWeek - 1;
+
+  const prevMonth = () => {
+    setCurrentDate(new Date(year, month - 1, 1));
+  };
+
+  const nextMonth = () => {
+    setCurrentDate(new Date(year, month + 1, 1));
+  };
+
+  const days = [];
+  for (let i = 0; i < startDayOfWeek; i++) {
+    days.push(null);
+  }
+  for (let d = 1; d <= daysInMonth; d++) {
+    days.push(d);
+  }
+
+  const weekDays = ["Dush", "Sesh", "Chor", "Pay", "Jum", "Shan", "Yak"];
+
+  return (
+    <div className="card p-4 w-full bg-white dark:bg-dark-800 border border-slate-100 dark:border-dark-700/50 rounded-2xl shadow-sm">
+      <div className="flex items-center justify-between mb-3">
+        <h3 className="font-bold text-dark-900 dark:text-white text-sm">
+          {monthNames[month]} {year}
+        </h3>
+        <div className="flex gap-1">
+          <button type="button" onClick={prevMonth} className="p-1 hover:bg-slate-100 dark:hover:bg-dark-700 rounded-lg text-slate-500 transition-colors">
+            <ChevronLeft className="w-4 h-4" />
+          </button>
+          <button type="button" onClick={nextMonth} className="p-1 hover:bg-slate-100 dark:hover:bg-dark-700 rounded-lg text-slate-500 transition-colors">
+            <ChevronRight className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-7 gap-1 text-center text-[10px] font-bold text-slate-400 dark:text-dark-400 mb-1">
+        {weekDays.map(wd => (
+          <div key={wd} className="py-0.5">{wd}</div>
+        ))}
+      </div>
+
+      <div className="grid grid-cols-7 gap-1">
+        {days.map((day, idx) => {
+          if (day === null) {
+            return <div key={`empty-${idx}`} className="aspect-square" />;
+          }
+
+          const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+          const purchase = purchaseDates.get(dateStr);
+
+          return (
+            <div
+              key={`day-${day}`}
+              className={`aspect-square flex flex-col items-center justify-center rounded-lg text-xs font-bold transition-all relative group cursor-pointer ${
+                purchase
+                  ? 'bg-gradient-to-br from-emerald-500 to-emerald-600 text-white shadow-sm hover:scale-105'
+                  : 'hover:bg-slate-100 dark:hover:bg-dark-700/50 text-slate-700 dark:text-dark-200'
+              }`}
+            >
+              <span>{day}</span>
+              {purchase && (
+                <div className="absolute bottom-0.5 w-1 h-1 bg-white rounded-full" />
+              )}
+              
+              {purchase && (
+                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 hidden group-hover:block bg-slate-900 dark:bg-dark-950 text-white text-[10px] rounded-lg p-2 whitespace-nowrap z-50 shadow-xl border border-slate-800 pointer-events-none">
+                  <p className="font-bold text-emerald-400">{formatDate(dateStr)}</p>
+                  <p className="mt-0.5">Asfalt: {formatTons(purchase.tons)}</p>
+                  <p>Summa: {formatCurrency(purchase.amount)}</p>
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
 
 export default function ClientProfile() {
   const { id } = useParams<{ id: string }>();
@@ -27,6 +136,20 @@ export default function ClientProfile() {
   }
 
   const clientSales = useMemo(() => sales.filter(s => s.clientId === id).sort((a, b) => b.date.localeCompare(a.date)), [sales, id]);
+
+  const salesByDate = useMemo(() => {
+    const map: Record<string, { date: string; tons: number; amount: number; count: number }> = {};
+    clientSales.forEach(s => {
+      const d = s.date;
+      if (!map[d]) {
+        map[d] = { date: d, tons: 0, amount: 0, count: 0 };
+      }
+      map[d].tons += s.tons;
+      map[d].amount += s.totalAmount;
+      map[d].count += 1;
+    });
+    return Object.values(map).sort((a, b) => b.date.localeCompare(a.date));
+  }, [clientSales]);
 
   const stats = useMemo(() => ({
     totalAmount: clientSales.reduce((s, x) => s + x.totalAmount, 0),
@@ -178,6 +301,64 @@ export default function ClientProfile() {
           </div>
         </div>
       )}
+
+      {/* Asfalt olingan kunlar section */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="md:col-span-1">
+          <div className="card p-5 h-full flex flex-col justify-between">
+            <div>
+              <h2 className="font-bold text-dark-900 dark:text-white flex items-center gap-2 mb-2">
+                <Calendar className="w-5 h-5 text-emerald-500" />
+                Asfalt olingan kunlar
+              </h2>
+              <p className="text-xs text-slate-500 dark:text-dark-400">
+                Mijoz jami <b>{salesByDate.length}</b> kun davomida asfalt sotib olgan. Kalendarda yashil rang bilan belgilangan kunlarda xarid amalga oshirilgan.
+              </p>
+            </div>
+            
+            <div className="mt-5 bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-100 dark:border-emerald-900/30 rounded-2xl p-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-emerald-500 text-white rounded-xl flex items-center justify-center font-bold text-lg">
+                  {salesByDate.length}
+                </div>
+                <div>
+                  <p className="text-xs text-slate-500">Xarid kunlari</p>
+                  <p className="text-sm font-bold text-emerald-600 dark:text-emerald-400">Jami faol kunlar</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div className="md:col-span-1 flex justify-center">
+          <PurchaseCalendar salesByDate={salesByDate} />
+        </div>
+        
+        <div className="md:col-span-1">
+          <div className="card p-5 h-full flex flex-col">
+            <h3 className="font-bold text-dark-900 dark:text-white mb-3 text-sm">
+              Xarid kunlari ro'yxati
+            </h3>
+            <div className="overflow-y-auto max-h-[220px] pr-1 space-y-2 custom-scrollbar">
+              {salesByDate.map(day => (
+                <div key={day.date} className="flex items-center justify-between p-2.5 bg-slate-50 dark:bg-dark-700/30 hover:bg-slate-100 dark:hover:bg-dark-700/60 rounded-xl transition-colors border border-slate-100 dark:border-dark-700/50">
+                  <div>
+                    <p className="text-xs font-bold text-dark-800 dark:text-dark-200">{formatDate(day.date)}</p>
+                    <p className="text-[10px] text-slate-400">{day.count} marta reys</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-xs font-black text-emerald-600 dark:text-emerald-400">{formatTons(day.tons)}</p>
+                    <p className="text-[10px] text-slate-500">{formatCurrency(day.amount)}</p>
+                  </div>
+                </div>
+              ))}
+              {salesByDate.length === 0 && (
+                <p className="text-xs text-slate-400 text-center py-8">Kunlar ro'yxati bo'sh</p>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
 
       {/* Purchase history */}
       <div className="card overflow-hidden">

@@ -8,6 +8,7 @@ COPY package*.json ./
 RUN npm install --legacy-peer-deps
 
 COPY prisma ./prisma
+RUN sed -i 's/provider = "sqlite"/provider = "postgresql"/g' prisma/schema.prisma
 RUN npx prisma generate
 
 COPY . .
@@ -23,12 +24,13 @@ COPY package*.json ./
 RUN npm install --omit=dev --legacy-peer-deps
 
 COPY prisma ./prisma
+RUN sed -i 's/provider = "sqlite"/provider = "postgresql"/g' prisma/schema.prisma
 RUN npx prisma generate
 
-COPY server/index.js ./server/index.js
+COPY server ./server
 COPY --from=builder /app/dist ./dist
 
 EXPOSE 3000
 ENV NODE_ENV=production
 
-CMD ["sh", "-c", "npx prisma db push --accept-data-loss && node server/index.js"]
+CMD ["node", "--experimental-strip-types", "server/index.ts"]
