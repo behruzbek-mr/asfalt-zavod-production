@@ -22,14 +22,16 @@ function WorkerForm({ worker, onClose }: { worker?: Worker; onClose: () => void 
     if (worker) {
       updateWorker(worker.id, { name: name.trim(), position: position.trim(), phone: phone.trim(), startDate, monthlySalary: parseFloat(salary) });
     } else {
-      addWorker({ name: name.trim(), position: position.trim(), phone: phone.trim(), startDate, monthlySalary: parseFloat(salary) } as any);
+      addWorker({ id: generateId(), name: name.trim(), position: position.trim(), phone: phone.trim(), startDate, monthlySalary: parseFloat(salary), createdAt: new Date().toISOString() });
       if (isOurDriver) {
         addDriver({
+          id: generateId(),
           name: name.trim(),
           phone: phone.trim(),
           carModel: 'O\'zimizning yuk mashina',
           carNumber: 'Bizniki',
-        } as any);
+          createdAt: new Date().toISOString(),
+        });
       }
     }
     onClose();
@@ -78,29 +80,32 @@ function PaymentForm({ worker, onClose }: { worker: Worker; onClose: () => void 
 
     // 1) Create worker payment record
     await addWorkerPayment({
-      workerId: worker.id, workerName: worker.name, month,
+      id: generateId(), workerId: worker.id, workerName: worker.name, month,
       daysWorked: parseFloat(daysWorked) || 0,
       advance: totalPaid, totalEarned, totalPaid, remaining,
-      note: note.trim() || undefined,
-    } as any);
+      note: note.trim() || undefined, createdAt: new Date().toISOString(),
+    });
 
     // 2) Auto-create expense entry for salary paid
     if (totalEarned > 0) {
       // Find or use "Ishchi maoshi" category
       let salaryCat = expenseCategories.find(c => c.name.toLowerCase().includes('maosh') || c.name.toLowerCase().includes('ish'));
       if (!salaryCat) {
-        const newCat = { name: 'Ishchi maoshi', color: '#6366f1', icon: 'Users' };
-        await addExpenseCategory(newCat as any);
-        salaryCat = (expenseCategories.find(c => c.name === 'Ishchi maoshi')) || { id: '', name: 'Ishchi maoshi', color: '#6366f1', icon: 'Users' };
+        const newCatId = generateId();
+        const newCat = { id: newCatId, name: 'Ishchi maoshi', color: '#6366f1', icon: 'Users' };
+        await addExpenseCategory(newCat);
+        salaryCat = newCat;
       }
       await addExpense({
+        id: generateId(),
         categoryId: salaryCat.id,
         categoryName: salaryCat.name,
         amount: totalEarned,
         description: `${worker.name} — ${month} oylik maoshi (${daysWorked} kun)`,
         recipient: worker.name,
+        createdAt: new Date().toISOString(),
         date,
-      } as any);
+      });
     }
 
     onClose();

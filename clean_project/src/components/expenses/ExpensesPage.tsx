@@ -18,7 +18,7 @@ function CategoryForm({ onClose }: { onClose: () => void }) {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) return;
-    addExpenseCategory({ name: name.trim(), color, icon: 'MoreHorizontal' } as any);
+    addExpenseCategory({ id: generateId(), name: name.trim(), color, icon: 'MoreHorizontal' });
     onClose();
   };
   return (
@@ -48,11 +48,11 @@ function ExpenseForm({ onClose }: { onClose: () => void }) {
     e.preventDefault();
     if (!categoryId || !amount || parseFloat(amount) <= 0) return;
     addExpense({
-      categoryId, categoryName: selectedCat?.name || '',
+      id: generateId(), categoryId, categoryName: selectedCat?.name || '',
       amount: parseFloat(amount), description: description.trim() || selectedCat?.name || '',
       recipient: recipient.trim() || undefined,
-      date,
-    } as any);
+      createdAt: new Date().toISOString(), date,
+    });
     onClose();
   };
 

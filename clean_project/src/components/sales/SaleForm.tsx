@@ -112,12 +112,13 @@ export function SaleForm({ onClose }: { onClose: () => void }) {
     if (!tons || parseFloat(tons) <= 0) { setError('Tonna noto\'g\'ri'); return; }
     if (!pricePerTon || parseFloat(pricePerTon) <= 0) { setError('Narx noto\'g\'ri'); return; }
 
-    let clientId = clients.find(c => c.name === clientName)?.id || '';
+    let clientId = clients.find(c => c.name === clientName)?.id || generateId();
 
-    const sale: any = {
+    const sale: Sale = {
+      id: generateId(),
       clientId,
       clientName,
-      driverId: drivers.find(d => d.name === driverName)?.id || '',
+      driverId: drivers.find(d => d.name === driverName)?.id || generateId(),
       driverName,
       driverCarNumber: driverCar,
       tons: parseFloat(tons),
@@ -125,6 +126,7 @@ export function SaleForm({ onClose }: { onClose: () => void }) {
       totalAmount,
       paymentType,
       note: note.trim() || undefined,
+      createdAt: new Date().toISOString(),
       date: getTodayDate(),
     };
 

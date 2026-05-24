@@ -24,7 +24,7 @@ function DriverForm({ driver, onClose }: { driver?: Driver; onClose: () => void 
     if (driver) {
       updateDriver(driver.id, { name: name.trim(), phone: phone.trim(), carNumber: carNumber.trim(), carModel: carModel.trim(), ...extra });
     } else {
-      addDriver({ name: name.trim(), phone: phone.trim(), carNumber: carNumber.trim(), carModel: carModel.trim() || undefined, ...extra } as any);
+      addDriver({ id: generateId(), name: name.trim(), phone: phone.trim(), carNumber: carNumber.trim(), carModel: carModel.trim() || undefined, createdAt: new Date().toISOString(), ...extra } as any);
     }
     onClose();
   };

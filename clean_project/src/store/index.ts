@@ -9,14 +9,7 @@ const apiFetch = async (endpoint: string, method = 'GET', body?: any) => {
     headers: { 'Content-Type': 'application/json' },
     body: body ? JSON.stringify(body) : undefined,
   });
-  if (!res.ok) {
-    let errMsg = `Server xatosi (${res.status})`;
-    try {
-      const errData = await res.json();
-      if (errData?.error) errMsg = errData.error;
-    } catch {}
-    throw new Error(errMsg);
-  }
+  if (!res.ok) throw new Error('API Error');
   return res.json();
 };
 
@@ -65,7 +58,6 @@ interface AppState {
   deleteWorkerPayment: (id: string) => Promise<void>;
 
   addSupplier: (s: Supplier) => Promise<void>;
-  deleteSupplier: (id: string) => Promise<void>;
 
   addClientPayment: (p: ClientPayment) => Promise<void>;
   deleteClientPayment: (id: string) => Promise<void>;
@@ -155,7 +147,6 @@ export const useStore = create<AppState>((set, get) => ({
   deleteWorkerPayment: async (id) => { await apiFetch(`/worker-payments/${id}`, 'DELETE'); set(s => ({ workerPayments: s.workerPayments.filter(x => x.id !== id) })); },
 
   addSupplier: async (sup) => { const res = await apiFetch('/suppliers', 'POST', sup); set(s => ({ suppliers: [...s.suppliers, res] })); },
-  deleteSupplier: async (id) => { await apiFetch(`/suppliers/${id}`, 'DELETE'); set(s => ({ suppliers: s.suppliers.filter(x => x.id !== id) })); },
 
   addClientPayment: async (p) => {
     const res = await apiFetch('/client-payments', 'POST', p);

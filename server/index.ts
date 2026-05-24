@@ -68,15 +68,26 @@ app.get('/api/clients', asyncHandler(async (req, res) => {
   res.json(data);
 }));
 app.post('/api/clients', asyncHandler(async (req, res) => {
-  const data = await prisma.client.create({ data: req.body });
+  const { name, phone, address, company, totalDebt } = req.body;
+  const data = await prisma.client.create({
+    data: { name, phone, address: address || null, company: company || null, totalDebt: totalDebt || 0 }
+  });
   res.json(data);
 }));
 app.put('/api/clients/:id', asyncHandler(async (req, res) => {
-  const data = await prisma.client.update({ where: { id: req.params.id }, data: req.body });
+  const { name, phone, address, company, totalDebt } = req.body;
+  const data = await prisma.client.update({
+    where: { id: req.params.id },
+    data: { name, phone, address: address || null, company: company || null, totalDebt: totalDebt || 0 }
+  });
   res.json(data);
 }));
 app.delete('/api/clients/:id', asyncHandler(async (req, res) => {
-  await prisma.client.delete({ where: { id: req.params.id } });
+  const id = req.params.id;
+  // Cascade: avval bog'liq sotuvlarni o'chiramiz (nasiya qarzlarini ham hisobga olamiz)
+  await prisma.clientPayment.deleteMany({ where: { clientId: id } });
+  await prisma.sale.deleteMany({ where: { clientId: id } });
+  await prisma.client.delete({ where: { id } });
   res.json({ ok: true });
 }));
 
@@ -112,15 +123,27 @@ app.get('/api/drivers', asyncHandler(async (req, res) => {
   res.json(data);
 }));
 app.post('/api/drivers', asyncHandler(async (req, res) => {
-  const data = await prisma.driver.create({ data: req.body });
+  const { name, phone, carNumber, carModel } = req.body;
+  const data = await prisma.driver.create({
+    data: { name, phone: phone || '', carNumber, carModel: carModel || null }
+  });
   res.json(data);
 }));
 app.put('/api/drivers/:id', asyncHandler(async (req, res) => {
-  const data = await prisma.driver.update({ where: { id: req.params.id }, data: req.body });
+  const { name, phone, carNumber, carModel } = req.body;
+  const data = await prisma.driver.update({
+    where: { id: req.params.id },
+    data: { name, phone: phone || '', carNumber, carModel: carModel || null }
+  });
   res.json(data);
 }));
 app.delete('/api/drivers/:id', asyncHandler(async (req, res) => {
-  await prisma.driver.delete({ where: { id: req.params.id } });
+  const id = req.params.id;
+  // Cascade: bog'liq xomashyo tranzaksiyalaridan driver referansini olib tashlaymiz (nullable field)
+  await prisma.rawMaterialTransaction.updateMany({ where: { driverId: id }, data: { driverId: null, driverName: null } });
+  // Bog'liq sotuvlarni o'chiramiz (driverId required field)
+  await prisma.sale.deleteMany({ where: { driverId: id } });
+  await prisma.driver.delete({ where: { id } });
   res.json({ ok: true });
 }));
 
@@ -196,8 +219,16 @@ app.get('/api/suppliers', asyncHandler(async (req, res) => {
   res.json(data);
 }));
 app.post('/api/suppliers', asyncHandler(async (req, res) => {
-  const data = await prisma.supplier.create({ data: req.body });
+  const { name, phone } = req.body;
+  const data = await prisma.supplier.create({ data: { name, phone: phone || null } });
   res.json(data);
+}));
+app.delete('/api/suppliers/:id', asyncHandler(async (req, res) => {
+  const id = req.params.id;
+  // Cascade: tranzaksiyalardan supplier referansini olib tashlaymiz
+  await prisma.rawMaterialTransaction.updateMany({ where: { supplierId: id }, data: { supplierId: null, supplierName: null } });
+  await prisma.supplier.delete({ where: { id } });
+  res.json({ ok: true });
 }));
 
 // ========== EXPENSES ==========
@@ -206,7 +237,10 @@ app.get('/api/expenses', asyncHandler(async (req, res) => {
   res.json(data);
 }));
 app.post('/api/expenses', asyncHandler(async (req, res) => {
-  const data = await prisma.expense.create({ data: req.body });
+  const { categoryId, categoryName, amount, description, recipient, date } = req.body;
+  const data = await prisma.expense.create({
+    data: { categoryId, categoryName, amount, description: description || '', recipient: recipient || null, date: date || new Date().toISOString().slice(0, 10) }
+  });
   res.json(data);
 }));
 app.delete('/api/expenses/:id', asyncHandler(async (req, res) => {
@@ -220,7 +254,8 @@ app.get('/api/expense-categories', asyncHandler(async (req, res) => {
   res.json(data);
 }));
 app.post('/api/expense-categories', asyncHandler(async (req, res) => {
-  const data = await prisma.expenseCategoryDef.create({ data: req.body });
+  const { name, color, icon } = req.body;
+  const data = await prisma.expenseCategoryDef.create({ data: { name, color: color || '#6366f1', icon: icon || 'Tag' } });
   res.json(data);
 }));
 app.delete('/api/expense-categories/:id', asyncHandler(async (req, res) => {
@@ -234,15 +269,25 @@ app.get('/api/workers', asyncHandler(async (req, res) => {
   res.json(data);
 }));
 app.post('/api/workers', asyncHandler(async (req, res) => {
-  const data = await prisma.worker.create({ data: req.body });
+  const { name, position, phone, startDate, monthlySalary } = req.body;
+  const data = await prisma.worker.create({
+    data: { name, position: position || '', phone: phone || '', startDate: startDate || new Date().toISOString().slice(0, 10), monthlySalary: monthlySalary || 0 }
+  });
   res.json(data);
 }));
 app.put('/api/workers/:id', asyncHandler(async (req, res) => {
-  const data = await prisma.worker.update({ where: { id: req.params.id }, data: req.body });
+  const { name, position, phone, startDate, monthlySalary } = req.body;
+  const data = await prisma.worker.update({
+    where: { id: req.params.id },
+    data: { name, position: position || '', phone: phone || '', startDate, monthlySalary: monthlySalary || 0 }
+  });
   res.json(data);
 }));
 app.delete('/api/workers/:id', asyncHandler(async (req, res) => {
-  await prisma.worker.delete({ where: { id: req.params.id } });
+  const id = req.params.id;
+  // Cascade: avval ishchi to'lovlarini o'chiramiz
+  await prisma.workerPayment.deleteMany({ where: { workerId: id } });
+  await prisma.worker.delete({ where: { id } });
   res.json({ ok: true });
 }));
 
@@ -252,7 +297,10 @@ app.get('/api/worker-payments', asyncHandler(async (req, res) => {
   res.json(data);
 }));
 app.post('/api/worker-payments', asyncHandler(async (req, res) => {
-  const data = await prisma.workerPayment.create({ data: req.body });
+  const { workerId, workerName, month, daysWorked, advance, totalEarned, totalPaid, remaining, note } = req.body;
+  const data = await prisma.workerPayment.create({
+    data: { workerId, workerName, month, daysWorked: daysWorked || 0, advance: advance || 0, totalEarned: totalEarned || 0, totalPaid: totalPaid || 0, remaining: remaining || 0, note: note || null }
+  });
   res.json(data);
 }));
 app.delete('/api/worker-payments/:id', asyncHandler(async (req, res) => {

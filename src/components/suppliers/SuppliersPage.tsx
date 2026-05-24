@@ -16,11 +16,9 @@ function SupplierForm({ supplier, onClose }: { supplier?: Supplier; onClose: () 
     if (!name.trim()) { setError('Firma nomi kiritilmagan'); return; }
     
     await addSupplier({
-      id: supplier?.id || generateId(),
       name: name.trim(),
-      phone: phone.trim(),
-      createdAt: supplier?.createdAt || new Date().toISOString(),
-    });
+      phone: phone.trim() || undefined,
+    } as any);
     onClose();
   };
 
@@ -61,7 +59,7 @@ function SupplierForm({ supplier, onClose }: { supplier?: Supplier; onClose: () 
 }
 
 export default function SuppliersPage() {
-  const { suppliers, rawTransactions, expenses } = useStore();
+  const { suppliers, rawTransactions, expenses, deleteSupplier } = useStore();
   const [search, setSearch] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [editSupplier, setEditSupplier] = useState<Supplier | null>(null);
@@ -262,7 +260,7 @@ export default function SuppliersPage() {
                   <button onClick={() => { setEditSupplier(s); setShowModal(true); }} className="p-2 text-slate-400 hover:text-blue-500 transition-colors">
                     <Pencil className="w-4 h-4" />
                   </button>
-                  <button className="p-2 text-slate-400 hover:text-red-500 transition-colors">
+                  <button onClick={() => deleteSupplier(s.id)} className="p-2 text-slate-400 hover:text-red-500 transition-colors">
                     <Trash2 className="w-4 h-4" />
                   </button>
                 </div>

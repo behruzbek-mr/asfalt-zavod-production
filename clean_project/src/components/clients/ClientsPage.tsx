@@ -22,7 +22,7 @@ function ClientForm({ client, onClose }: { client?: Client; onClose: () => void 
     if (client) {
       updateClient(client.id, { name: name.trim(), phone: phone.trim(), address: address.trim() || undefined, company: company.trim() || undefined, totalDebt: parseFloat(debt) || 0 });
     } else {
-      addClient({ name: name.trim(), phone: phone.trim(), address: address.trim() || undefined, company: company.trim() || undefined, totalDebt: parseFloat(debt) || 0 } as any);
+      addClient({ id: generateId(), name: name.trim(), phone: phone.trim(), address: address.trim() || undefined, company: company.trim() || undefined, totalDebt: parseFloat(debt) || 0, createdAt: new Date().toISOString() });
     }
     onClose();
   };

@@ -1,0 +1,177 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  username  String   @unique
+  password  String
+  fullName  String
+  role      String
+  createdAt DateTime @default(now())
+  isActive  Boolean  @default(true)
+}
+
+model Client {
+  id          String   @id @default(uuid())
+  name        String
+  phone       String
+  address     String?
+  company     String?
+  createdAt   DateTime @default(now())
+  totalDebt   Float    @default(0)
+  sales       Sale[]
+  payments    ClientPayment[]
+}
+
+model ClientPayment {
+  id          String   @id @default(uuid())
+  amount      Float
+  note        String?
+  date        String
+  createdAt   DateTime @default(now())
+  
+  client      Client   @relation(fields: [clientId], references: [id])
+  clientId    String
+  clientName  String
+}
+
+model Driver {
+  id          String   @id @default(uuid())
+  name        String
+  phone       String
+  carNumber   String
+  carModel    String?
+  createdAt   DateTime @default(now())
+  
+  sales       Sale[]
+  transactions RawMaterialTransaction[]
+}
+
+model Sale {
+  id              String   @id @default(uuid())
+  tons            Float
+  pricePerTon     Float
+  totalAmount     Float
+  paymentType     String
+  note            String?
+  date            String
+  createdAt       DateTime @default(now())
+
+  client          Client   @relation(fields: [clientId], references: [id])
+  clientId        String
+  clientName      String
+
+  driver          Driver   @relation(fields: [driverId], references: [id])
+  driverId        String
+  driverName      String
+  driverCarNumber String
+}
+
+model RawMaterial {
+  id          String   @id @default(uuid())
+  name        String
+  unit        String
+  quantity    Float    @default(0)
+  minQuantity Float    @default(0)
+  
+  transactions RawMaterialTransaction[]
+}
+
+model Supplier {
+  id          String   @id @default(uuid())
+  name        String
+  phone       String?
+  createdAt   DateTime @default(now())
+  
+  transactions RawMaterialTransaction[]
+}
+
+model RawMaterialTransaction {
+  id            String   @id @default(uuid())
+  type          String
+  quantity      Float
+  price         Float?
+  totalPrice    Float?
+  docNumber     String?
+  note          String?
+  date          String
+  createdAt     DateTime @default(now())
+
+  material      RawMaterial @relation(fields: [materialId], references: [id])
+  materialId    String
+  materialName  String
+
+  supplier      Supplier?   @relation(fields: [supplierId], references: [id])
+  supplierId    String?
+  supplierName  String?
+
+  driver        Driver?     @relation(fields: [driverId], references: [id])
+  driverId      String?
+  driverName    String?
+}
+
+model ExpenseCategoryDef {
+  id          String   @id @default(uuid())
+  name        String
+  color       String
+  icon        String
+  
+  expenses    Expense[]
+}
+
+model Expense {
+  id            String   @id @default(uuid())
+  amount        Float
+  description   String
+  recipient     String?
+  date          String
+  createdAt     DateTime @default(now())
+
+  category      ExpenseCategoryDef @relation(fields: [categoryId], references: [id])
+  categoryId    String
+  categoryName  String
+}
+
+model Worker {
+  id            String   @id @default(uuid())
+  name          String
+  position      String
+  phone         String
+  startDate     String
+  monthlySalary Float
+  createdAt     DateTime @default(now())
+  
+  payments      WorkerPayment[]
+}
+
+model WorkerPayment {
+  id            String   @id @default(uuid())
+  month         String
+  daysWorked    Int
+  advance       Float
+  totalEarned   Float
+  totalPaid     Float
+  remaining     Float
+  note          String?
+  createdAt     DateTime @default(now())
+
+  worker        Worker   @relation(fields: [workerId], references: [id])
+  workerId      String
+  workerName    String
+}
+
+model AppSettings {
+  id                  String @id @default("default")
+  factoryName         String
+  address             String
+  phone               String
+  defaultPricePerTon  Float
+  currency            String
+  theme               String @default("light")
+}
